@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  carpal-client:
+    image: ${IMAGE_TAG:-ghcr.io/your-org/carpal-client:latest}
+    container_name: carpal-client
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - PORT=3300
+      - NEXT_PUBLIC_BILINFO_SECRET=${NEXT_PUBLIC_BILINFO_SECRET}
+      - NEXT_PUBLIC_BILINFO_API_URL=${NEXT_PUBLIC_BILINFO_API_URL}
+      - BILINFO_API_URL=${BILINFO_API_URL}
+      - NEXT_PUBLIC_BILINFO_DEALER_ID=${NEXT_PUBLIC_BILINFO_DEALER_ID}
+    env_file:
+      - .env.prod
+    restart: unless-stopped
+    networks:
+      - carpal-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3300"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  carpal-network:
+    driver: bridge

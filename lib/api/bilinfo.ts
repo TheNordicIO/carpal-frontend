@@ -138,12 +138,25 @@ export async function syncOne(vin: string): Promise<BilinfoSyncOneResponse> {
   if (!baseUrl || !secret) {
     return { status: "error", message: "Bilinfo API URL or secret not configured" }
   }
-  const body = new FormData()
-  body.append("action", "sync_one")
-  body.append("vin", vin)
-  body.append("secret", secret)
+  // const body = new FormData()
+  // body.append("action", "sync_one")
+  // body.append("vin", vin)
+  // body.append("secret", secret)
+
+  const body = {
+    action: "sync_one",
+    vin: vin,
+    secret: secret,
+  }
   // TODO: replace with your real backend call
-  const res = await fetch(baseUrl, { method: "POST", body })
+  const url = `${baseUrl}bilinfo/dashboard/sync-one`
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  })
   const data = (await res.json()) as BilinfoSyncOneResponse
   if (!res.ok) {
     return { status: "error", message: data.message ?? `HTTP ${res.status}` }
@@ -161,12 +174,23 @@ export async function syncAll(vins: string[]): Promise<BilinfoSyncAllResponse> {
   if (!baseUrl || !secret) {
     return { status: "error", message: "Bilinfo API URL or secret not configured" }
   }
-  const body = new FormData()
-  body.append("action", "sync_all")
-  body.append("secret", secret)
-  vins.forEach((v) => body.append("vins[]", v))
+  const body = {
+    action: "sync_all",
+    secret: secret,
+    vins: vins,
+  }
+  // body.append("action", "sync_all")
+  // body.append("secret", secret)
+  // vins.forEach((v) => body.append("vins[]", v))
   // TODO: replace with your real backend call
-  const res = await fetch(baseUrl, { method: "POST", body })
+  const url = `${baseUrl}bilinfo/dashboard/sync-all`   
+  const res = await fetch(url, { 
+    method: "POST", 
+    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
   const data = (await res.json()) as BilinfoSyncAllResponse
   if (!res.ok) {
     return { status: "error", message: data.message ?? `HTTP ${res.status}` }

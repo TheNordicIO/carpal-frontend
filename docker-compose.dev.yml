@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  carpal-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: carpal-client-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - NEXT_PUBLIC_BILINFO_SECRET=${NEXT_PUBLIC_BILINFO_SECRET}
+      - NEXT_PUBLIC_BILINFO_API_URL=${NEXT_PUBLIC_BILINFO_API_URL}
+      - BILINFO_API_URL=${BILINFO_API_URL}
+      - NEXT_PUBLIC_BILINFO_DEALER_ID=${NEXT_PUBLIC_BILINFO_DEALER_ID}
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: pnpm dev
+    restart: unless-stopped
+    networks:
+      - carpal-network
+
+networks:
+  carpal-network:
+    driver: bridge

@@ -1,0 +1,174 @@
+"use client"
+
+import { useState, useCallback } from "react"
+import { Loader2, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { fetchDeal } from "@/lib/api/zoho-deal"
+import type { ZohoDealResponse } from "@/types/zoho-deal"
+import { cn } from "@/lib/utils"
+
+type DealData = ZohoDealResponse | null
+type StatusMessage = { kind: "success" | "destructive" | "info"; msg: string } | null
+
+export default function ZohoDealPage() {
+  const [dealId, setDealId] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [dealData, setDealData] = useState<DealData>(null)
+  const [statusMessage, setStatusMessage] = useState<StatusMessage>(null)
+
+  const clearStatus = useCallback(() => {
+    setStatusMessage(null)
+  }, [])
+
+  const showStatus = useCallback((kind: "success" | "destructive" | "info", msg: string) => {
+    setStatusMessage({ kind, msg })
+    if (kind !== "info") {
+      setTimeout(() => setStatusMessage(null), 6000)
+    }
+  }, [])
+
+  const handleLookup = useCallback(async () => {
+    const id = dealId.trim()
+    if (!id) {
+      showStatus("destructive", "Indtast venligst et Deal ID")
+      return
+    }
+
+    setLoading(true)
+    setDealData(null)
+    clearStatus()
+
+    try {
+      const data = await fetchDeal(id)
+      setDealData(data)
+      showStatus("success", "Deal data hentet succesfuldt")
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Ukendt fejl"
+      showStatus("destructive", `Fejl: ${errorMsg}`)
+    } finally {
+      setLoading(false)
+    }
+  }, [dealId, showStatus, clearStatus])
+
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && !loading) {
+        handleLookup()
+      }
+    },
+    [handleLookup, loading]
+  )
+
+  return (
+    <div className="container mx-auto flex min-h-screen flex-col bg-muted/30 px-4 py-6 lg:px-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">Zoho Deal Opslag</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Indtast et Deal ID for at hente deal data fra Zoho CRM
+        </p>
+      </div>
+
+      <Card className="mb-4 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Input
+              type="text"
+              placeholder="Indtast Deal ID"
+              value={dealId}
+              onChange={(e) => setDealId(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={loading}
+              className="flex-1"
+              autoFocus
+            />
+            <Button onClick={handleLookup} disabled={loading || !dealId.trim()}>
+              {loading ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Search className="mr-2 size-4" />
+              )}
+              Slå op
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {statusMessage && (
+        <Alert
+          variant={
+            statusMessage.kind === "destructive"
+              ? "destructive"
+              : statusMessage.kind === "success"
+                ? "success"
+                : "default"
+          }
+          className="mb-4"
+        >
+          <AlertDescription>{statusMessage.msg}</AlertDescription>
+        </Alert>
+      )}
+
+      {dealData && (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <JsonCard
+            title="Deal Data (komplet)"
+            data={dealData}
+            className="lg:col-span-2"
+          />
+          {dealData.Car_Details && (
+            <JsonCard
+              title="Car Details"
+              data={dealData.Car_Details}
+            />
+          )}
+          {dealData.Car_Choices && dealData.Car_Choices.length > 0 && (
+            <JsonCard
+              title={`Car Choices (${dealData.Car_Choices.length})`}
+              data={dealData.Car_Choices}
+            />
+          )}
+          {dealData.Car && (
+            <JsonCard
+              title="Car Reference"
+              data={dealData.Car}
+            />
+          )}
+        </div>
+      )}
+
+      {!dealData && !loading && (
+        <Card className="shadow-sm">
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <p>Indtast et Deal ID og klik på "Slå op" for at starte.</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+function JsonCard({
+  title,
+  data,
+  className,
+}: {
+  title: string
+  data: unknown
+  className?: string
+}) {
+  return (
+    <Card className={cn("shadow-sm", className)}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <pre className="whitespace-pre-wrap break-words rounded-md bg-slate-950 p-4 text-xs text-slate-50">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </CardContent>
+    </Card>
+  )
+}

@@ -221,7 +221,7 @@ export default function BilinfoDashboardPage() {
           </span>
         </h1>
         <small className="text-muted-foreground">
-          Dealer: <code className="rounded bg-muted px-1.5 py-0.5">{DEALER_ID}</code>
+          Dealer: <code className="rounded bg-muted px-1.5 py-0.5 text-red-500">{DEALER_ID}</code>
         </small>
       </div>
 

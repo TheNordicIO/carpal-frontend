@@ -1,0 +1,207 @@
+name: Deploy Carpal Client (Next.js)
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Test Job
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm lint
+
+      # - name: Run tests
+      #   run: pnpm test
+
+  # Build and Push Docker Image
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      deploy_tag: ${{ steps.tag.outputs.DEPLOY_TAG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute deploy tag
+        id: tag
+        run: |
+          SHORT_SHA=${GITHUB_SHA::7}
+          if [ "${GITHUB_REF_NAME}" = "dev" ]; then
+            echo "DEPLOY_TAG=dev-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          elif [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "DEPLOY_TAG=main-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          else
+            echo "DEPLOY_TAG=${GITHUB_REF_NAME}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Normalize image name
+        id: normalize
+        run: |
+          echo "IMAGE_NAME_LOWER=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: runner
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:${{ steps.tag.outputs.DEPLOY_TAG }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Deploy to Development
+  deploy-dev:
+    runs-on: ubuntu-latest
+    needs: [test, build-and-push]
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Development
+        run: |
+          echo "🚀 Deploying to Development Environment"
+          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev"
+          # Add your dev deployment commands here
+          # Example: kubectl set image deployment/nextjs-app nextjs-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:dev
+
+  # Deploy to Production
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Checkout deployment files
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docker-compose.prod.main.yaml
+
+      - name: Install sshpass
+        run: sudo apt update && sudo apt install -y sshpass
+
+      - name: Set cleaned root password to SSHPASS
+        run: |
+          PASSWORD="${{ secrets.PROD_SSH_PASSWORD }}"
+          CLEANED=$(echo "$PASSWORD" | tr -d '\r\n\t ')
+          echo "SSHPASS=$CLEANED" >> $GITHUB_ENV
+
+      - name: Copy files to production server
+        run: |
+          echo "กำลัง copy ไฟล์ไปที่ root@${{ secrets.PROD_HOST }}:~/${{ secrets.PROD_DIR }}/"
+          
+          sshpass -e scp -O \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            docker-compose.prod.main.yaml root@${{ secrets.PROD_HOST }}:~/${{ secrets.PROD_DIR }}/
+
+          echo "Copy ไฟล์เสร็จเรียบร้อย!"
+
+      - name: Deploy to Production Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: root
+          password: ${{ secrets.PROD_SSH_PASSWORD }}
+          script: |
+            set -eo pipefail
+
+            DEPLOY_TAG="${{ needs.build-and-push.outputs.deploy_tag }}"
+            echo "Deploying with tag: $DEPLOY_TAG"
+
+            cd ~/${{ secrets.PROD_DIR }}
+
+            # อัปเดต IMAGE_TAG ใน .env
+            if [ -f .env.prod ]; then ENV_FILE=.env.prod; else ENV_FILE=.env; fi
+            touch "$ENV_FILE"
+
+            awk -v kv="IMAGE_TAG=$DEPLOY_TAG" '
+              /^IMAGE_TAG=/ { print kv; found=1; next }
+              { print }
+              END { if (!found) print kv }
+            ' "$ENV_FILE" > tmp_env && mv tmp_env "$ENV_FILE"
+
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "📥 Pulling latest images..."
+            docker compose -f docker-compose.prod.main.yaml --env-file "$ENV_FILE" pull
+
+            echo "🚀 Starting application services..."
+            docker compose -f docker-compose.prod.main.yaml -p carpal-client --env-file "$ENV_FILE" up -d
+
+            # Wait for app to be healthy
+            echo "⏳ Waiting for application to be ready..."
+            sleep 10
+
+            # Health check
+            echo "🏥 Performing health check..."
+            for i in {1..20}; do
+              if curl -f http://localhost:3300 2>/dev/null; then
+                echo "✅ Application is healthy!"
+                break
+              fi
+              if [ $i -eq 20 ]; then
+                echo "❌ Health check failed after 20 attempts"
+                docker compose -f docker-compose.prod.main.yaml --env-file "$ENV_FILE" logs --tail=50 carpal-client
+                exit 1
+              fi
+              echo "Attempt $i/20: Waiting for application to be ready..."
+              sleep 2
+            done
+
+            echo "✅ Production deployment completed successfully!"

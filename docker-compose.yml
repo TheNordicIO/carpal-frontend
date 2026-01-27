@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  carpal-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: carpal-client
+    ports:
+      - "3300:3300"
+    environment:
+      - NODE_ENV=production
+      - PORT=3300
+      - NEXT_PUBLIC_BILINFO_SECRET=${NEXT_PUBLIC_BILINFO_SECRET}
+      - NEXT_PUBLIC_BILINFO_API_URL=${NEXT_PUBLIC_BILINFO_API_URL}
+      - BILINFO_API_URL=${BILINFO_API_URL}
+      - NEXT_PUBLIC_BILINFO_DEALER_ID=${NEXT_PUBLIC_BILINFO_DEALER_ID}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - carpal-network
+
+networks:
+  carpal-network:
+    driver: bridge

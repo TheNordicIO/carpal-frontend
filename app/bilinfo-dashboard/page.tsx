@@ -38,7 +38,7 @@ function CheckPill({
   label: string
   ok: boolean | null
 }) {
-  const variant = ok === true ? "success" : ok === false ? "destructive" : "secondary"
+  // const variant = ok === true ? "success" : ok === false ? "destructive" : "secondary"
   const suffix = ok === true ? " ✓" : ok === false ? " ✗" : ""
   return (
     <span
@@ -197,8 +197,8 @@ export default function BilinfoDashboardPage() {
   const sortedRows = [...rows].sort((a, b) => {
     const k = sort.key
     const dir = sort.dir === "asc" ? 1 : -1
-    let A: unknown = a[k as keyof BilinfoListingRow]
-    let B: unknown = b[k as keyof BilinfoListingRow]
+    const A: unknown = a[k as keyof BilinfoListingRow]
+    const B: unknown = b[k as keyof BilinfoListingRow]
     if (k === "Title" || k === "Vin" || k === "EdbNumber") {
       return dir * String(A ?? "").localeCompare(String(B ?? ""), "da")
     }
@@ -311,7 +311,7 @@ export default function BilinfoDashboardPage() {
               {rows.length === 0 && !loading && (
                 <TableRow>
                   <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                    Tryk "Hent Annoncer" for at starte.
+                    Tryk &quot;Hent Annoncer&quot; for at starte.
                   </TableCell>
                 </TableRow>
               )}

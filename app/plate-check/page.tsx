@@ -6,17 +6,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { fetchDeal } from "@/lib/api/zoho-deal"
-import type { ZohoDealResponse } from "@/types/zoho-deal"
-import { cn } from "@/lib/utils"
+import { checkPlate } from "@/lib/api/plate-check"
+import type { PlateCheckResponse } from "@/types/plate-check"
 
-type DealData = ZohoDealResponse | null
+type PlateData = PlateCheckResponse | null
 type StatusMessage = { kind: "success" | "destructive" | "info"; msg: string } | null
 
-export default function ZohoDealPage() {
-  const [dealId, setDealId] = useState("")
+export default function PlateCheckPage() {
+  const [plate, setPlate] = useState("")
   const [loading, setLoading] = useState(false)
-  const [dealData, setDealData] = useState<DealData>(null)
+  const [plateData, setPlateData] = useState<PlateData>(null)
   const [statusMessage, setStatusMessage] = useState<StatusMessage>(null)
 
   const clearStatus = useCallback(() => {
@@ -31,27 +30,27 @@ export default function ZohoDealPage() {
   }, [])
 
   const handleLookup = useCallback(async () => {
-    const id = dealId.trim()
-    if (!id) {
-      showStatus("destructive", "Indtast venligst et Deal ID")
+    const plateValue = plate.trim()
+    if (!plateValue) {
+      showStatus("destructive", "Indtast venligst en nummerplade")
       return
     }
 
     setLoading(true)
-    setDealData(null)
+    setPlateData(null)
     clearStatus()
 
     try {
-      const data = await fetchDeal(id)
-      setDealData(data)
-      showStatus("success", "Deal data hentet succesfuldt")
+      const data = await checkPlate(plateValue)
+      setPlateData(data)
+      showStatus("success", "Nummerplade data hentet succesfuldt")
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Ukendt fejl"
       showStatus("destructive", `Fejl: ${errorMsg}`)
     } finally {
       setLoading(false)
     }
-  }, [dealId, showStatus, clearStatus])
+  }, [plate, showStatus, clearStatus])
 
   const handleKeyPress = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -65,9 +64,9 @@ export default function ZohoDealPage() {
   return (
     <div className="container mx-auto flex min-h-screen flex-col bg-muted/30 px-4 py-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Zoho Deal Opslag</h1>
+        <h1 className="text-2xl font-semibold">Bilinfo Nummerplade Opslag</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Indtast et Deal ID for at hente deal data fra Zoho CRM
+          Indtast en nummerplade for at hente bil data fra Bilinfo
         </p>
       </div>
 
@@ -76,15 +75,15 @@ export default function ZohoDealPage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Input
               type="text"
-              placeholder="Indtast Deal ID"
-              value={dealId}
-              onChange={(e) => setDealId(e.target.value)}
+              placeholder="Indtast nummerplade (f.eks. AB12345)"
+              value={plate}
+              onChange={(e) => setPlate(e.target.value.toUpperCase())}
               onKeyPress={handleKeyPress}
               disabled={loading}
               className="flex-1"
               autoFocus
             />
-            <Button onClick={handleLookup} disabled={loading || !dealId.trim()}>
+            <Button onClick={handleLookup} disabled={loading || !plate.trim()}>
               {loading ? (
                 <Loader2 className="mr-2 size-4 animate-spin" />
               ) : (
@@ -111,38 +110,25 @@ export default function ZohoDealPage() {
         </Alert>
       )}
 
-      {dealData && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {plateData && (
+        <div className="grid grid-cols-1 gap-4">
           <JsonCard
-            title="Deal Data (komplet)"
-            data={dealData}
-            className="lg:col-span-2"
+            title="Bil Data (komplet)"
+            data={plateData}
           />
-          {dealData.Car_Details && (
+          {plateData.vehicleDetails && (
             <JsonCard
-              title="Car Details"
-              data={dealData.Car_Details}
-            />
-          )}
-          {dealData.Car_Choices && dealData.Car_Choices.length > 0 && (
-            <JsonCard
-              title={`Car Choices (${dealData.Car_Choices.length})`}
-              data={dealData.Car_Choices}
-            />
-          )}
-          {dealData.Car && (
-            <JsonCard
-              title="Car Reference"
-              data={dealData.Car}
+              title="Vehicle Details"
+              data={plateData.vehicleDetails}
             />
           )}
         </div>
       )}
 
-      {!dealData && !loading && (
+      {!plateData && !loading && (
         <Card className="shadow-sm">
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>Indtast et Deal ID og klik på &quot;Slå op&quot; for at starte.</p>
+            <p>Indtast en nummerplade og klik på &quot;Slå op&quot; for at starte.</p>
           </CardContent>
         </Card>
       )}
@@ -160,7 +146,7 @@ function JsonCard({
   className?: string
 }) {
   return (
-    <Card className={cn("shadow-sm", className)}>
+    <Card className={`shadow-sm ${className || ""}`}>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { fetchTicketPreview, enqueueTicket } from "@/lib/api/zoho-desk"
-import type { TicketPreviewResponse, EnqueueResponse } from "@/types/zoho-desk"
+import type { TicketPreviewResponse } from "@/types/zoho-desk"
 import { cn } from "@/lib/utils"
 
 type PreviewData = TicketPreviewResponse | null
@@ -182,7 +182,7 @@ export default function ZohoDeskTicketPage() {
       {!previewData && !loading && (
         <Card className="shadow-sm">
           <CardContent className="py-12 text-center text-muted-foreground">
-            <p>Indtast et Ticket ID og klik på "Vis Preview" for at starte.</p>
+            <p>Indtast et Ticket ID og klik på &quot;Vis Preview&quot; for at starte.</p>
           </CardContent>
         </Card>
       )}

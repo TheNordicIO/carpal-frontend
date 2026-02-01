@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   carpal-client:
-    image: ${IMAGE_TAG:-ghcr.io/your-org/carpal-client:latest}
+    image: ${IMAGE_TAG:-ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG:?missing}
     container_name: carpal-client
     ports:
       - "3300:3300"
@@ -14,7 +14,7 @@ services:
       - BILINFO_API_URL=${BILINFO_API_URL}
       - NEXT_PUBLIC_BILINFO_DEALER_ID=${NEXT_PUBLIC_BILINFO_DEALER_ID}
     env_file:
-      - .env.prod
+      - .env
     restart: unless-stopped
     networks:
       - carpal-network

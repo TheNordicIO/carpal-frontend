@@ -1,10 +1,16 @@
 # Carpal Client
 
-A Next.js application for managing and displaying Bilinfo dashboard data. This application is designed to run on a VPS and is served through an nginx reverse proxy.
+A Next.js application for managing Bilinfo dashboard data, Zoho integrations, and contract flows. This application is designed to run on a VPS and is served through an nginx reverse proxy.
 
 ## Overview
 
-Carpal Client is a modern web application built with Next.js that provides a dashboard interface for managing Bilinfo listings, Zoho Desk ticket processing, and Zoho Deal lookup. The application runs on `localhost:3300` and is accessible through `carpal.thenordic.cloud/ui/*` via nginx reverse proxy.
+Carpal Client is a modern web application built with Next.js that provides:
+- **Bilinfo Dashboard** – manage Bilinfo listings and sync with Zoho deals
+- **Zoho Desk Ticket** – preview and enqueue tickets with AI lead extraction
+- **Zoho Deal** – lookup and view deal and car details
+- **Contracts** – multi-step contract flow (Purchase/Sales Agreement) with deal lookup, attachments, screenshot preview, and send for signing
+
+The application runs on `localhost:3300` and is accessible through `carpal.thenordic.cloud/ui/*` via nginx reverse proxy.
 
 ## Tech Stack
 
@@ -25,20 +31,25 @@ The project follows a feature-based organization pattern as outlined in `docs/co
 carpal-client/
 ├── app/                    # Next.js App Router pages
 │   ├── bilinfo-dashboard/  # Bilinfo dashboard feature
+│   ├── contracts/          # Contracts flow (deal → sign → send)
 │   ├── zoho-desk-ticket/   # Zoho Desk ticket preview and enqueue
 │   ├── zoho-deal/          # Zoho Deal lookup and details
 │   ├── layout.tsx          # Root layout
 │   └── page.tsx            # Home page
 ├── components/             # React components
+│   ├── features/           # Feature-specific components
+│   │   └── contract-flow/  # Contracts step components (Forside, Kunde, Bil, etc.)
 │   └── ui/                 # Reusable UI components (shadcn/ui)
 ├── lib/                    # Core utilities and configurations
 │   ├── api/                # API client functions
 │   │   ├── bilinfo.ts      # Bilinfo API client
+│   │   ├── contracts.ts    # Contracts API (deal lookup, get deal, upload, screenshot, send)
 │   │   ├── zoho-desk.ts    # Zoho Desk API client
 │   │   └── zoho-deal.ts    # Zoho Deal API client
 │   └── utils.ts            # Utility functions
 ├── types/                  # TypeScript type definitions
 │   ├── bilinfo.ts          # Bilinfo types
+│   ├── contracts.ts        # Contracts types (deal, car, extras, attachments)
 │   ├── zoho-desk.ts        # Zoho Desk types
 │   └── zoho-deal.ts        # Zoho Deal types
 ├── public/                 # Static assets
@@ -114,6 +125,10 @@ NEXT_PUBLIC_BILINFO_SECRET=FAJIfjkisaldfj38459htjngFGD
 NEXT_PUBLIC_BILINFO_API_URL=http://localhost:8000/v1/
 BILINFO_API_URL=http://localhost:8000/v1/
 NEXT_PUBLIC_BILINFO_DEALER_ID=b96ced54-91a4-e911-9877-0050568635ef
+
+# Contracts (deal lookup, attachments, screenshot, send)
+NEXT_PUBLIC_API_URL=http://localhost:8000/v1/
+NEXT_PUBLIC_PUBLIC_BASE_URL=http://localhost:8000
 ```
 
 ### ⚠️ Important Notes
@@ -128,8 +143,10 @@ NEXT_PUBLIC_BILINFO_DEALER_ID=b96ced54-91a4-e911-9877-0050568635ef
 - `NEXT_PUBLIC_BILINFO_API_URL`: Public API URL for backend services (exposed to client). Used by Bilinfo, Zoho Desk, and Zoho Deal features.
 - `BILINFO_API_URL`: Server-side API URL for backend services (server-only). Used by Bilinfo, Zoho Desk, and Zoho Deal features.
 - `NEXT_PUBLIC_BILINFO_DEALER_ID`: Dealer ID for Bilinfo integration (exposed to client)
+- `NEXT_PUBLIC_API_URL`: Base URL for Contracts API (e.g. `http://localhost:8000/v1/`). Used for deal lookup, get deal, attachments upload/delete, screenshot, and send.
+- `NEXT_PUBLIC_PUBLIC_BASE_URL`: Public base URL for static assets (e.g. terms PDF) and attachment/screenshot URLs.
 
-**Note**: The Zoho Desk Ticket and Zoho Deal features use the same API URL environment variables (`NEXT_PUBLIC_BILINFO_API_URL` and `BILINFO_API_URL`) to connect to the backend. Ensure your backend is configured to handle Bilinfo, Zoho Desk, and Zoho Deal endpoints.
+**Note**: The Zoho Desk Ticket and Zoho Deal features use the same API URL environment variables (`NEXT_PUBLIC_BILINFO_API_URL` and `BILINFO_API_URL`) to connect to the backend. The Contracts feature uses `NEXT_PUBLIC_API_URL` for `/contracts/api` endpoints. Ensure your backend is configured for the relevant routes.
 
 ## Development
 
@@ -372,6 +389,20 @@ Lookup and view detailed information about Zoho CRM deals. This feature provides
 
 Access the Zoho Deal page at `/zoho-deal`.
 
+### Contracts
+Multi-step contract flow for Purchase Agreement and Sales Agreement. The flow mirrors the PHP contract flow and uses the same backend API.
+
+- **Steps**: Forside (open deal) → Kunde → Bil → Finansiering → Ekstra salg → Vedhæftede → Handlinger → Færdig (success). Step order and visibility follow the PHP source of truth.
+- **Deal lookup**: Open a deal by Deal-ID or Deal Number; URL updates with `record_id` and `contract_type` (`purchase_agreement` or `sales_agreement`).
+- **Deal data**: Loads deal, car, contacts, external products, and deal invoice; editable fields (e.g. Sales_Price, handover text, payment date) sync to the send payload with Zoho field names.
+- **Finansiering**: Purchase total = price − rest − Success Fee; Sales adds all extras to effective price. Trade-in and financing options for sales.
+- **Ekstra salg**: Extras from deal invoice; Success Fee readonly for purchase; add external product or custom; invoice lines on send: purchase = Success Fee only, sales = all.
+- **Vedhæftede**: Terms PDF, main screenshot (polled every 5s), indexed screenshot/files (indices 0–10), uploaded PDFs (`record_id-index.pdf`), and “Filer fra dealen” list. Upload uses backend URL for iframe; delete removes file and index.
+- **Handlinger**: Email/private message, payment date and text, extra contract message; “Send til signering” sends payload (edited_fields, extras_invoice, attachments) to backend. On success, redirects to Færdig step.
+- **API**: `POST /contracts/api/deal/lookup`, `GET /contracts/api/deal/:recordId`, `POST /contracts/api/attachments/upload`, `DELETE .../upload/file`, `GET /contracts/api/screenshot/:dealId` (and by index), `POST /contracts/api/send`. See [Contracts API spec](./docs/contracts-endpoints.md).
+
+Access the Contracts page at `/contracts`.
+
 ### General Features
 - **Modern UI**: Built with shadcn/ui components for a consistent and accessible user interface
 - **Type Safety**: Full TypeScript support for better developer experience and fewer runtime errors
@@ -390,6 +421,7 @@ For more details, see the workflow file or check the [Deployment](#deployment) s
 ## Documentation
 
 - [Project Conventions](./docs/conventions.md) - Detailed folder structure and coding standards
+- [Contracts API](./docs/contracts-endpoints.md) - Contract flow endpoints (deal lookup, get deal, upload, screenshot, send)
 
 ## License
 

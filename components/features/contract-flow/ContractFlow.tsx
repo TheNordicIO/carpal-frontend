@@ -45,6 +45,12 @@ import { VedhaeftedeStep } from "./VedhaeftedeStep"
 /** PHP canonical name for the fee row (readonly in purchase). */
 const SUCCESS_FEE_NAME = "Success Fee"
 
+/** Contracts route with base path (e.g. /ui/contracts when NEXT_PUBLIC_BASE_PATH=/ui). */
+function contractsPath(): string {
+  const base = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "")
+  return base ? `${base}/contracts` : "/contracts"
+}
+
 function buildExtrasFromInvoice(
   dealInvoice: DealInvoiceRow[],
   externalProducts: ProductData[],
@@ -299,7 +305,7 @@ export function ContractFlow() {
       const params = new URLSearchParams(searchParams.toString())
       params.set("record_id", id)
       params.set("contract_type", contractType)
-      router.replace(`/contracts?${params.toString()}`)
+      router.replace(`${contractsPath()}?${params.toString()}`)
     } catch (e) {
       setOpenDealError(e instanceof Error ? e.message : "Ukendt fejl")
     }
@@ -313,7 +319,7 @@ export function ContractFlow() {
       const params = new URLSearchParams(searchParams.toString())
       if (recordId) params.set("record_id", recordId)
       params.set("contract_type", next)
-      router.replace(`/contracts?${params.toString()}`)
+      router.replace(`${contractsPath()}?${params.toString()}`)
     },
     [recordId, searchParams, router]
   )
@@ -326,7 +332,7 @@ export function ContractFlow() {
       const params = new URLSearchParams(searchParams.toString())
       if (recordId) params.set("record_id", recordId)
       params.set("contract_type", next)
-      router.replace(`/contracts?${params.toString()}`)
+      router.replace(`${contractsPath()}?${params.toString()}`)
     },
     [recordId, searchParams, router]
   )

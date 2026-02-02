@@ -9,6 +9,7 @@ import {
   getScreenshotStatus,
   getScreenshotUrl,
   getScreenshotUrlByIndex,
+  getTermsUrl,
   PUBLIC_BASE_URL,
 } from "@/lib/api/contracts"
 import type { ContractAttachment, ContractType } from "@/types/contracts"
@@ -62,12 +63,7 @@ export function VedhaeftedeStep({
 
   const allFiles = [...dealFiles, ...uploadedAttachments]
   const screenshotUrl = screenshotState === "ready" && recordId ? getScreenshotUrl(recordId) : null
-  const termsUrl = PUBLIC_BASE_URL
-    ? `${PUBLIC_BASE_URL}/terms.pdf`
-    : ""
-
-  console.log("termsUrl", termsUrl)
-  console.log("Process.env.NEXT_PUBLIC_PUBLIC_BASE_URL", PUBLIC_BASE_URL)
+  const termsUrl = getTermsUrl()
 
   useEffect(() => {
     if (!recordId) {

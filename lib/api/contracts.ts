@@ -17,6 +17,8 @@ import type {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ""
 
+export const PUBLIC_BASE_URL = process.env.NEXT_PUBLIC_PUBLIC_BASE_URL ?? ""
+
 const BASE_ENDPOINT = "contracts/api"
 
 const API_BASE = `${BASE_URL}${BASE_ENDPOINT}`

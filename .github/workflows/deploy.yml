@@ -90,12 +90,6 @@ jobs:
         run: |
           echo "IMAGE_NAME_LOWER=$(echo '${{ env.IMAGE_NAME }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      - name: Set Next.js public env for build
-        run: |
-          echo "NEXT_PUBLIC_BASE_PATH=${{ vars.NEXT_PUBLIC_BASE_PATH || '/ui' }}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'https://carpal.thenordic.cloud/ui/' }}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_PUBLIC_BASE_URL=${{ vars.NEXT_PUBLIC_PUBLIC_BASE_URL || 'https://carpal.thenordic.cloud' }}" >> $GITHUB_ENV
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -107,10 +101,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            NEXT_PUBLIC_BASE_PATH=${{ env.NEXT_PUBLIC_BASE_PATH }}
-            NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_PUBLIC_BASE_URL=${{ env.NEXT_PUBLIC_PUBLIC_BASE_URL }}
 
   # Deploy to Development
   deploy-dev:

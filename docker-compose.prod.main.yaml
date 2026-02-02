@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   carpal-client:
-    image: ${IMAGE_TAG:-ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG:?missing}
+    image: ghcr.io/${GITHUB_REPOSITORY}:${IMAGE_TAG:?missing}
     container_name: carpal-client
     ports:
       - "3300:3300"

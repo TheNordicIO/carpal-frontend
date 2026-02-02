@@ -131,6 +131,10 @@ export function getTermsUrl(): string {
   return `${PUBLIC_BASE_URL}/terms.pdf`
 }
 
+export function getAttachmentUrl(url: string): string {
+  return `${PUBLIC_BASE_URL}/${url}`
+}
+
 /** URL for screenshot/file at index (e.g. record_id-0.pdf style) */
 export function getScreenshotUrlByIndex(dealId: string, index: number): string {
   return `${API_BASE}/screenshot/${encodeURIComponent(dealId)}-${index}`

@@ -21,8 +21,14 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set environment variables for build
+# Build-time env (NEXT_PUBLIC_* are inlined into client bundle at build time)
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_BASE_PATH
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_PUBLIC_BASE_URL=$NEXT_PUBLIC_PUBLIC_BASE_URL
 
 # Build the application
 RUN pnpm build

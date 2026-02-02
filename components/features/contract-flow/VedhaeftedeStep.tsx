@@ -65,9 +65,6 @@ export function VedhaeftedeStep({
     ? `${process.env.NEXT_PUBLIC_PUBLIC_BASE_URL}/terms.pdf`
     : ""
 
-  console.log("termsUrl", termsUrl)
-  console.log("Process.env.NEXT_PUBLIC_PUBLIC_BASE_URL", process.env.NEXT_PUBLIC_PUBLIC_BASE_URL)
-
   useEffect(() => {
     if (!recordId) {
       const tid = setTimeout(() => {

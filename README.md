@@ -347,10 +347,11 @@ server {
 
 **Production env** (when the app is served under `/ui/`):
 
-- **`NEXT_PUBLIC_BASE_PATH=/ui`** – So Next.js and the router use `/ui` as the base path. Without this, “Åbn” and other redirects go to `/contracts?...` instead of `/ui/contracts?...`.
+- **`NEXT_PUBLIC_BASE_PATH=/ui`** – So Next.js and the router use `/ui` as the base path.
 - **`NEXT_PUBLIC_API_URL=https://carpal.thenordic.cloud/ui/`** – So the client calls the same host and path nginx proxies to the backend.
+- **`NEXT_PUBLIC_PUBLIC_BASE_URL=https://carpal.thenordic.cloud`** – So the client can load terms PDF and attachment URLs (e.g. `/terms.pdf`).
 
-Then the client will request `https://carpal.thenordic.cloud/ui/contracts/api/...` and redirects will stay under `https://carpal.thenordic.cloud/ui/contracts?...`. If your backend is on another port or path, change `proxy_pass` and the port (e.g. `8000`) accordingly.
+**Important:** `NEXT_PUBLIC_*` variables are **inlined at build time**, not read from `.env` at runtime. Setting them only in the server `.env` or docker-compose will not change the client bundle. The GitHub Actions workflow passes these as **Docker build-args** (with defaults for carpal.thenordic.cloud). To override, set repository variables `NEXT_PUBLIC_BASE_PATH`, `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_PUBLIC_BASE_URL` in GitHub (Settings → Secrets and variables → Actions → Variables). If your backend is on another port or path, change `proxy_pass` and the port (e.g. `8000`) accordingly.
 
 **Note**: Adjust the configuration according to your specific nginx setup and backend URL.
 

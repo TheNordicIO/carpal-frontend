@@ -227,8 +227,6 @@ export function ContractFlow() {
         if (data.error) return
         setDeal(data.deal ?? null)
         setCar(data.car ?? null)
-        console.log(data.contact1)
-        console.log(data.contact2)
         setContact1(data.contact1 ?? null)
         setContact2(data.contact2 ?? null)
         setExternalProducts(data.externalProducts ?? [])
@@ -305,7 +303,9 @@ export function ContractFlow() {
       const params = new URLSearchParams(searchParams.toString())
       params.set("record_id", id)
       params.set("contract_type", contractType)
-      router.replace(`${contractsPath()}?${params.toString()}`)
+
+      console.log(`${contractsPath()}?${params.toString()}?yes=true`)
+      router.replace(`${contractsPath()}?${params.toString()}?yes=true`)
     } catch (e) {
       setOpenDealError(e instanceof Error ? e.message : "Ukendt fejl")
     }

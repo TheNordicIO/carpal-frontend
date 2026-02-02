@@ -145,6 +145,7 @@ NEXT_PUBLIC_PUBLIC_BASE_URL=http://localhost:8000
 - `NEXT_PUBLIC_BILINFO_DEALER_ID`: Dealer ID for Bilinfo integration (exposed to client)
 - `NEXT_PUBLIC_API_URL`: Base URL for Contracts API (e.g. `http://localhost:8000/v1/`). Used for deal lookup, get deal, attachments upload/delete, screenshot, and send.
 - `NEXT_PUBLIC_PUBLIC_BASE_URL`: Public base URL for static assets (e.g. terms PDF) and attachment/screenshot URLs.
+- `NEXT_PUBLIC_BASE_PATH`: When the app is served under a subpath (e.g. nginx at `/ui/`), set to `/ui` so all routes and redirects use `/ui` (e.g. `/ui/contracts`). Leave unset for local dev at root.
 
 **Note**: The Zoho Desk Ticket and Zoho Deal features use the same API URL environment variables (`NEXT_PUBLIC_BILINFO_API_URL` and `BILINFO_API_URL`) to connect to the backend. The Contracts feature uses `NEXT_PUBLIC_API_URL` for `/contracts/api` endpoints. Ensure your backend is configured for the relevant routes.
 
@@ -307,13 +308,26 @@ docker-compose up -d carpal-client
 
 ### Nginx Configuration
 
-Example nginx configuration for reverse proxy:
+The browser calls the Contracts API at the same origin (e.g. `https://carpal.thenordic.cloud/ui/contracts/api/deal/lookup`). You must proxy **`/ui/contracts/api/`** to your backend API server, not to the Next.js app. If all of `/ui/` goes to Next.js, those API requests hit the app and return 404.
+
+Example nginx configuration:
 
 ```nginx
 server {
     listen 80;
     server_name carpal.thenordic.cloud;
 
+    # Contracts API: proxy to backend (must come before /ui/)
+    location /ui/contracts/api/ {
+        proxy_pass http://localhost:9000/v1/contracts/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Next.js app (UI)
     location /ui/ {
         proxy_pass http://localhost:3300/;
         proxy_http_version 1.1;
@@ -328,7 +342,17 @@ server {
 }
 ```
 
-**Note**: Adjust the configuration according to your specific nginx setup and requirements.
+- **`/ui/contracts/api/`** → backend at `http://localhost:8000/v1/contracts/api/` (e.g. `/ui/contracts/api/deal/lookup` → backend `/v1/contracts/api/deal/lookup`).
+- **`/ui/`** (everything else) → Next.js at `http://localhost:3300/`.
+
+**Production env** (when the app is served under `/ui/`):
+
+- **`NEXT_PUBLIC_BASE_PATH=/ui`** – So Next.js and the router use `/ui` as the base path. Without this, “Åbn” and other redirects go to `/contracts?...` instead of `/ui/contracts?...`.
+- **`NEXT_PUBLIC_API_URL=https://carpal.thenordic.cloud/ui/`** – So the client calls the same host and path nginx proxies to the backend.
+
+Then the client will request `https://carpal.thenordic.cloud/ui/contracts/api/...` and redirects will stay under `https://carpal.thenordic.cloud/ui/contracts?...`. If your backend is on another port or path, change `proxy_pass` and the port (e.g. `8000`) accordingly.
+
+**Note**: Adjust the configuration according to your specific nginx setup and backend URL.
 
 ### Docker Image Details
 

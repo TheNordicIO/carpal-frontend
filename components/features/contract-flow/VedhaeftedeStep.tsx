@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import {
+  getAttachmentUrl,
   getAttachmentViewUrl,
   getScreenshotStatus,
   getScreenshotUrl,
@@ -243,7 +244,7 @@ export function VedhaeftedeStep({
                           )}
                         </div>
                         <iframe
-                          src={`${process.env.NEXT_PUBLIC_PUBLIC_BASE_URL}/${embedUrl}`}
+                          src={getAttachmentUrl(embedUrl)}
                           title={name}
                           className="w-full min-h-[400px] h-[50vh] rounded-md border border-border bg-muted"
                         />

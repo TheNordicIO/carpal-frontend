@@ -354,6 +354,23 @@ Then the client will request `https://carpal.thenordic.cloud/ui/contracts/api/..
 
 **Note**: Adjust the configuration according to your specific nginx setup and backend URL.
 
+#### Redirect /contracts to /ui/contracts
+
+If users or old links hit `/contracts` (without `/ui/`), add a redirect so they go to `/ui/contracts` instead (keeps query string):
+
+```nginx
+# Redirect /contracts and /contracts/ to /ui/contracts (preserve query string)
+location ~ ^/contracts/?$ {
+    return 301 $scheme://$host/ui/contracts$is_args$args;
+}
+```
+
+Put this **before** your `location /ui/` block (and before `location /`). Then:
+- `https://carpal.thenordic.cloud/contracts` → `https://carpal.thenordic.cloud/ui/contracts`
+- `https://carpal.thenordic.cloud/contracts?record_id=123&contract_type=purchase_agreement` → `https://carpal.thenordic.cloud/ui/contracts?record_id=123&contract_type=purchase_agreement`
+
+Reload nginx after editing: `sudo nginx -t && sudo systemctl reload nginx`
+
 ### Docker Image Details
 
 The Dockerfile uses a multi-stage build process:

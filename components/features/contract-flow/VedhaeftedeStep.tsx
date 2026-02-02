@@ -65,6 +65,9 @@ export function VedhaeftedeStep({
     ? `${process.env.NEXT_PUBLIC_PUBLIC_BASE_URL}/terms.pdf`
     : ""
 
+  console.log("termsUrl", termsUrl)
+  console.log("Process.env.NEXT_PUBLIC_PUBLIC_BASE_URL", process.env.NEXT_PUBLIC_PUBLIC_BASE_URL)
+
   useEffect(() => {
     if (!recordId) {
       const tid = setTimeout(() => {
@@ -225,8 +228,6 @@ export function VedhaeftedeStep({
                     const embedUrl = a.view_url || (a.url ? getAttachmentViewUrl(a.url) : "")
                     const name = fileName(a)
                     const fileUrl = a.url ?? a.view_url ?? ""
-                    console.log("fileUrl", fileUrl)
-                    console.log("embedUrl", embedUrl)
                     if (!embedUrl) return null
                     return (
                       <div key={i} className="relative">

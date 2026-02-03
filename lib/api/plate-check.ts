@@ -27,24 +27,24 @@
 
 import type { PlateCheckResponse, PlateCheckErrorResponse } from "@/types/plate-check"
 
-const getBaseUrl = () => {
-  // TODO: point to your backend API URL (e.g. env or config)
-  // Example: http://localhost:8000/v1/ or https://api.example.com/v1/
-  if (typeof window !== "undefined") {
-    return process.env.NEXT_PUBLIC_BILINFO_API_URL ?? ""
-  }
-  return process.env.BILINFO_API_URL ?? process.env.NEXT_PUBLIC_BILINFO_API_URL ?? ""
-}
+// const getBaseUrl = () => {
+//   // TODO: point to your backend API URL (e.g. env or config)
+//   // Example: http://localhost:8000/v1/ or https://api.example.com/v1/
+//   if (typeof window !== "undefined") {
+//     return process.env.NEXT_PUBLIC_BILINFO_API_URL ?? ""
+//   }
+//   return process.env.BILINFO_API_URL ?? process.env.NEXT_PUBLIC_BILINFO_API_URL ?? ""
+// }
 
 /**
  * Check license plate and fetch vehicle data from Bilinfo.
  * TODO: Implement – call your backend GET /v1/nummerpladetjek/:plate
  */
 export async function checkPlate(plate: string): Promise<PlateCheckResponse> {
-  const baseUrl = getBaseUrl()
-  if (!baseUrl) {
-    throw new Error("Backend API URL not configured")
-  }
+  // const baseUrl = getBaseUrl()
+  // if (!baseUrl) {
+  //   throw new Error("Backend API URL not configured")
+  // }
 
   if (!plate || plate.trim() === "") {
     throw new Error("Nummerplade mangler.")
@@ -55,7 +55,8 @@ export async function checkPlate(plate: string): Promise<PlateCheckResponse> {
 
   // TODO: replace with your real backend call
   // The endpoint should be: GET /v1/nummerpladetjek/:plate
-  const url = `${baseUrl}nummerpladetjek/${encodeURIComponent(normalizedPlate)}`
+  // const url = `${baseUrl}nummerpladetjek/${encodeURIComponent(normalizedPlate)}`
+  const url = `/v1/nummerpladetjek/${encodeURIComponent(normalizedPlate)}`
 
   const res = await fetch(url, { cache: "no-store" })
   const data = (await res.json()) as PlateCheckResponse | PlateCheckErrorResponse

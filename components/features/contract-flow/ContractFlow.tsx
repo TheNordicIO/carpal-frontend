@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
+import Box from "@mui/material/Box"
+import Button from "@mui/material/Button"
+import Chip from "@mui/material/Chip"
+import Container from "@mui/material/Container"
+import FormControl from "@mui/material/FormControl"
+import InputLabel from "@mui/material/InputLabel"
+import MenuItem from "@mui/material/MenuItem"
+import Paper from "@mui/material/Paper"
+import Select from "@mui/material/Select"
+import Typography from "@mui/material/Typography"
 import {
   dealLookup,
   deleteUploadedFile,
@@ -47,7 +47,8 @@ const SUCCESS_FEE_NAME = "Success Fee"
 
 /** Contracts route with base path (e.g. /ui/contracts when NEXT_PUBLIC_BASE_PATH=/ui). */
 function contractsPath(): string {
-  const base = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "")
+  // const base = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "")
+  const base = null;
   return base ? `${base}/contracts` : "/contracts"
 }
 
@@ -472,48 +473,68 @@ export function ContractFlow() {
     contractType === "purchase_agreement" ? "PURCHASE AGREEMENT" : "SALES AGREEMENT"
 
   return (
-    <div className="mx-auto grid max-w-[1280px] grid-cols-[260px_1fr] gap-5 px-4 py-6">
-      <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
-      <Card>
-        <CardContent className="p-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-4">
-            <div>
-              <h1 className="text-lg font-semibold">Kontraktflow</h1>
-              <small className="text-muted-foreground">
+    <Container maxWidth="lg" sx={{ py: 3, px: { xs: 2, sm: 3 } }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "260px 1fr" },
+          gap: 3,
+        }}
+      >
+        <StepNav activeStep={activeStep} onStepChange={setActiveStep} />
+        <Paper elevation={0} sx={{ overflow: "hidden", borderRadius: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              px: 3,
+              py: 2.5,
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+          >
+            <Box>
+              <Typography variant="h6" fontWeight={600}>
+                Kontraktflow
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 Bilinfo-inspireret opstilling • {contractTypeDisplay}
-              </small>
+              </Typography>
               {recordId && (
-                <div className="mt-2">
-                  <Badge variant="secondary" className="bg-[#eef2ff] text-[#1d4ed8]">
-                    Deal klar
-                  </Badge>
-                </div>
+                <Chip
+                  label="Deal klar"
+                  size="small"
+                  sx={{ mt: 1, bgcolor: "primary.light", color: "primary.dark" }}
+                />
               )}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Select
-                value={contractType}
-                onValueChange={handleContractTypeSelect}
-                aria-label="Kontrakttype"
-              >
-                <SelectTrigger id="contractTypeSelect" className="w-[200px] font-semibold">
-                  <SelectValue placeholder="Vælg type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="purchase_agreement">Purchase Agreement</SelectItem>
-                  <SelectItem value="sales_agreement">Sales Agreement</SelectItem>
-                </SelectContent>
-              </Select>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2 }}>
+              <FormControl size="small" sx={{ minWidth: 200 }}>
+                <InputLabel id="contractTypeSelect-label">Kontrakttype</InputLabel>
+                <Select
+                  labelId="contractTypeSelect-label"
+                  id="contractTypeSelect"
+                  value={contractType}
+                  label="Kontrakttype"
+                  onChange={(e) => handleContractTypeSelect(e.target.value)}
+                >
+                  <MenuItem value="purchase_agreement">Purchase Agreement</MenuItem>
+                  <MenuItem value="sales_agreement">Sales Agreement</MenuItem>
+                </Select>
+              </FormControl>
               <Button
-              type="button"
-              onClick={handleSend}
-              disabled={!recordId || sendLoader}
-              aria-busy={sendLoader}
-            >
-              Send til signering
-            </Button>
-            </div>
-          </div>
+                variant="contained"
+                onClick={handleSend}
+                disabled={!recordId || sendLoader}
+                aria-busy={sendLoader}
+              >
+                Send til signering
+              </Button>
+            </Box>
+          </Box>
 
           {activeStep === "forside" && (
           <ForsideStep
@@ -589,8 +610,8 @@ export function ContractFlow() {
           />
         )}
         {activeStep === "success" && <SuccessStep />}
-        </CardContent>
-      </Card>
-    </div>
+        </Paper>
+      </Box>
+    </Container>
   )
 }

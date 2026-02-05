@@ -1,15 +1,17 @@
 "use client"
 
 import { Fragment } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import Box from "@mui/material/Box"
+import Checkbox from "@mui/material/Checkbox"
+import FormControlLabel from "@mui/material/FormControlLabel"
+import FormControl from "@mui/material/FormControl"
+import Grid from "@mui/material/Grid"
+import InputLabel from "@mui/material/InputLabel"
+import MenuItem from "@mui/material/MenuItem"
+import Paper from "@mui/material/Paper"
+import Select from "@mui/material/Select"
+import TextField from "@mui/material/TextField"
+import Typography from "@mui/material/Typography"
 import { parseMoney, toMoney } from "@/lib/utils"
 import type { ContractType, DealData, ExtraItem } from "@/types/contracts"
 
@@ -76,96 +78,98 @@ export function FinansStep({
     ]
 
     return (
-      <section className="p-[18px]" aria-labelledby="finans-heading">
-        <div className="grid grid-cols-12 gap-3">
-          <Card className="col-span-12">
-            <CardContent className="pt-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="Under_finance"
-                name="Under_finance"
-                checked={underFinance}
-                onChange={(e) => onDealFormChange("Under_finance", e.target.checked)}
-                data-module="deal"
-                className="h-4 w-4 rounded border-input"
-                aria-label="Bilen er finansieret (restgæld)"
+      <Box component="section" sx={{ p: 2.5 }} aria-labelledby="finans-heading">
+        <Grid container spacing={2}>
+          <Grid size={12}>
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="Under_finance"
+                    name="Under_finance"
+                    checked={underFinance}
+                    onChange={(e) => onDealFormChange("Under_finance", e.target.checked)}
+                    inputProps={{ "aria-label": "Bilen er finansieret (restgæld)" }}
+                  />
+                }
+                label="Bilen er finansieret (restgæld)"
               />
-              <label htmlFor="Under_finance" className="text-sm">
-                Bilen er finansieret (restgæld)
-              </label>
-            </div>
-            {underFinance && (
-              <div className="mt-3 grid grid-cols-12 gap-3">
-                <div className="col-span-4">
-                  <label htmlFor="Outstanding_finance" className="mb-1 block text-xs text-muted-foreground">
-                    Restgæld (kr)
-                  </label>
-                  <Input
-                    id="Outstanding_finance"
-                    name="Outstanding_finance"
+              {underFinance && (
+                <Grid container spacing={2} sx={{ mt: 2 }}>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField
+                      id="Outstanding_finance"
+                      name="Outstanding_finance"
+                      label="Restgæld (kr)"
+                      inputMode="decimal"
+                      value={String(rest)}
+                      onChange={(e) => onDealFormChange("Outstanding_finance", e.target.value)}
+                      fullWidth
+                      size="small"
+                      inputProps={{ "data-module": "deal" }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 4 }}>
+                    <TextField
+                      id="Finance_Bank"
+                      name="Finance_Bank"
+                      label="Kreditor"
+                      value={bank}
+                      onChange={(e) => onDealFormChange("Finance_Bank", e.target.value)}
+                      fullWidth
+                      size="small"
+                      inputProps={{ "data-module": "deal" }}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+            </Paper>
+          </Grid>
+          <Grid size={12}>
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                Purchase-beregning
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, md: 4 }}>
+                  <TextField
+                    id="CarPal_sales_fee"
+                    name="CarPal_sales_fee"
+                    label="CarPal Salær (Success Fee)"
                     inputMode="decimal"
-                    value={String(rest)}
-                    onChange={(e) => onDealFormChange("Outstanding_finance", e.target.value)}
-                    data-module="deal"
+                    value={toMoney(fee)}
+                    onChange={(e) => onDealFormChange("CarPal_sales_fee", parseMoney(e.target.value))}
+                    fullWidth
+                    size="small"
+                    inputProps={{ "data-module": "deal" }}
                   />
-                </div>
-                <div className="col-span-4">
-                  <label htmlFor="Finance_Bank" className="mb-1 block text-xs text-muted-foreground">
-                    Kreditor
-                  </label>
-                  <Input
-                    id="Finance_Bank"
-                    name="Finance_Bank"
-                    value={bank}
-                    onChange={(e) => onDealFormChange("Finance_Bank", e.target.value)}
-                    data-module="deal"
-                  />
-                </div>
-              </div>
-            )}
-            </CardContent>
-          </Card>
-          <Card className="col-span-12">
-            <CardContent className="pt-4">
-            <h4 className="mb-3 font-semibold">Purchase-beregning</h4>
-            <div className="grid grid-cols-12 gap-3">
-              <div className="col-span-4">
-                <label htmlFor="CarPal_sales_fee" className="mb-1 block text-xs text-muted-foreground">
-                  CarPal Salær (Success Fee)
-                </label>
-                <Input
-                  id="CarPal_sales_fee"
-                  name="CarPal_sales_fee"
-                  inputMode="decimal"
-                  value={toMoney(fee)}
-                  onChange={(e) => onDealFormChange("CarPal_sales_fee", parseMoney(e.target.value))}
-                  data-module="deal"
-                />
-              </div>
-            </div>
-            <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-              {lines.map(([k, v]) => (
-                <Fragment key={k}>
-                  <div className="border-b border-dashed border-border px-3 py-2.5">
-                    {k}
-                  </div>
-                  <div className="border-b border-dashed border-border px-3 py-2.5">
-                    {v}
-                  </div>
-                </Fragment>
-              ))}
-              <div className="border-b border-dashed border-border px-3 py-2.5 font-bold">
-                KØBESUM (CarPal)
-              </div>
-              <div className="border-b border-dashed border-border px-3 py-2.5 font-bold">
-                {toMoney(total)}
-              </div>
-            </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+                </Grid>
+              </Grid>
+              <Box
+                sx={{
+                  mt: 2,
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto",
+                  gap: 1,
+                }}
+              >
+                {lines.map(([k, v]) => (
+                  <Fragment key={k}>
+                    <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                      {k}
+                    </Box>
+                    <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                      {v}
+                    </Box>
+                  </Fragment>
+                ))}
+                <Box sx={{ px: 1.5, py: 1.25, fontWeight: 700 }}>KØBESUM (CarPal)</Box>
+                <Box sx={{ px: 1.5, py: 1.25, fontWeight: 700 }}>{toMoney(total)}</Box>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
     )
   }
 
@@ -213,152 +217,168 @@ export function FinansStep({
   }
 
   return (
-    <section className="p-[18px]" aria-labelledby="finans-heading">
-      <div className="grid grid-cols-12 gap-3">
-        <div className="col-span-12 rounded-xl border border-border bg-card p-3.5">
-          <div className="grid grid-cols-12 gap-3">
-            <div className="col-span-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="Has_Trade_In"
-                  name="Has_Trade_In"
-                  checked={hasTrade}
-                  onChange={(e) => onDealFormChange("Has_Trade_In", e.target.checked)}
-                  data-module="deal"
-                  className="h-4 w-4 rounded border-input"
-                  aria-label="Tilføj byttebil"
+    <Box component="section" sx={{ p: 2.5 }} aria-labelledby="finans-heading">
+      <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 4 }}>
+            <FormControlLabel
+              control={
+                  <Checkbox
+                    id="Has_Trade_In"
+                    name="Has_Trade_In"
+                    checked={hasTrade}
+                    onChange={(e) => onDealFormChange("Has_Trade_In", e.target.checked)}
+                    inputProps={{ "aria-label": "Tilføj byttebil" }}
+                  />
+              }
+              label="Tilføj byttebil"
+            />
+            {hasTrade && (
+              <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+                <TextField
+                  id="Trade_in_Price"
+                  name="Trade_in_Price"
+                  label="Byttebilspris"
+                  inputMode="decimal"
+                  value={String(tiPrice)}
+                  onChange={(e) => onDealFormChange("Trade_in_Price", e.target.value)}
+                  fullWidth
+                  size="small"
+                  inputProps={{ "data-module": "deal" }}
                 />
-                <label htmlFor="Has_Trade_In" className="text-sm">
-                  Tilføj byttebil
-                </label>
-              </div>
-              {hasTrade && (
-                <div className="mt-2 space-y-2">
-                  <label htmlFor="Trade_in_Price" className="block text-xs text-muted-foreground">
-                    Byttebilspris
-                  </label>
-                  <Input
-                    id="Trade_in_Price"
-                    name="Trade_in_Price"
-                    inputMode="decimal"
-                    value={String(tiPrice)}
-                    onChange={(e) => onDealFormChange("Trade_in_Price", e.target.value)}
-                    data-module="deal"
-                  />
-                  <label htmlFor="Trade_in_Finance_Remaining" className="block text-xs text-muted-foreground">
-                    Pant i byttebil
-                  </label>
-                  <Input
-                    id="Trade_in_Finance_Remaining"
-                    name="Trade_in_Finance_Remaining"
-                    inputMode="decimal"
-                    value={String(tiDebt)}
-                    onChange={(e) => onDealFormChange("Trade_in_Finance_Remaining", e.target.value)}
-                    data-module="deal"
-                  />
-                  <label htmlFor="Trade_in_Usage_Type" className="block text-xs text-muted-foreground">
-                    Anvendelse
-                  </label>
+                <TextField
+                  id="Trade_in_Finance_Remaining"
+                  name="Trade_in_Finance_Remaining"
+                  label="Pant i byttebil"
+                  inputMode="decimal"
+                  value={String(tiDebt)}
+                  onChange={(e) => onDealFormChange("Trade_in_Finance_Remaining", e.target.value)}
+                  fullWidth
+                  size="small"
+                  inputProps={{ "data-module": "deal" }}
+                />
+                <FormControl fullWidth size="small">
+                  <InputLabel id="Trade_in_Usage_Type-label">Anvendelse</InputLabel>
                   <Select
+                    labelId="Trade_in_Usage_Type-label"
+                    id="Trade_in_Usage_Type"
+                    name="Trade_in_Usage_Type"
                     value={tiUsage}
-                    onValueChange={(v) => onDealFormChange("Trade_in_Usage_Type", v)}
+                    label="Anvendelse"
+                    onChange={(e) => onDealFormChange("Trade_in_Usage_Type", e.target.value)}
+                    inputProps={{ "data-module": "deal" }}
                   >
-                    <SelectTrigger id="Trade_in_Usage_Type" className="w-full font-normal" data-module="deal">
-                      <SelectValue placeholder="Vælg anvendelse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TRADE_IN_USAGE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
+                    {TRADE_IN_USAGE_OPTIONS.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
                   </Select>
-                </div>
-              )}
-            </div>
-            <div className="col-span-8">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
+                </FormControl>
+              </Box>
+            )}
+          </Grid>
+          <Grid size={{ xs: 12, md: 8 }}>
+            <FormControlLabel
+              control={
+                <Checkbox
                   id="Has_Financing"
                   name="Has_Financing"
                   checked={hasFin}
                   onChange={(e) => onDealFormChange("Has_Financing", e.target.checked)}
-                  data-module="deal"
-                  className="h-4 w-4 rounded border-input"
-                  aria-label="Tilføj finansiering"
+                  inputProps={{ "aria-label": "Tilføj finansiering" }}
                 />
-                <label htmlFor="Has_Financing" className="text-sm">
-                  Tilføj finansiering
-                </label>
-              </div>
-              {hasFin && (
-                <div className="mt-2 grid grid-cols-12 gap-3">
-                  <div className="col-span-6">
-                    <label htmlFor="Financing_Down_Payment_Amount" className="mb-1 block text-xs text-muted-foreground">
-                      Udbetaling (kr.)
-                    </label>
-                    <Input
-                      id="Financing_Down_Payment_Amount"
-                      name="Financing_Down_Payment_Amount"
-                      inputMode="decimal"
-                      value={String(dpAmount)}
-                      onChange={(e) => onDealFormChange("Financing_Down_Payment_Amount", e.target.value)}
-                      data-module="deal"
-                    />
-                  </div>
-                  <div className="col-span-6">
-                    <label htmlFor="Financing_Amount" className="mb-1 block text-xs text-muted-foreground">
-                      Lånebeløb (auto)
-                    </label>
-                    <Input
-                      id="Financing_Amount"
-                      value={toMoney(loan)}
-                      disabled
-                      readOnly
-                      data-module="deal"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-            <div className="border-b border-dashed border-border px-3 py-2.5">Salgspris</div>
-            <div className="border-b border-dashed border-border px-3 py-2.5">{toMoney(salesPrice)}</div>
-            {extraSum > 0 && (
-              <>
-                <div className="border-b border-dashed border-border px-3 py-2.5">
-                  + Extras (Ekstra salg)
-                </div>
-                <div className="border-b border-dashed border-border px-3 py-2.5">{toMoney(extraSum)}</div>
-              </>
+              }
+              label="Tilføj finansiering"
+            />
+            {hasFin && (
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    id="Financing_Down_Payment_Amount"
+                    name="Financing_Down_Payment_Amount"
+                    label="Udbetaling (kr.)"
+                    inputMode="decimal"
+                    value={String(dpAmount)}
+                    onChange={(e) => onDealFormChange("Financing_Down_Payment_Amount", e.target.value)}
+                    fullWidth
+                    size="small"
+                    inputProps={{ "data-module": "deal" }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <TextField
+                    id="Financing_Amount"
+                    label="Lånebeløb (auto)"
+                    value={toMoney(loan)}
+                    fullWidth
+                    size="small"
+                    inputProps={{ "data-module": "deal" }}
+                    InputProps={{ readOnly: true }}
+                  />
+                </Grid>
+              </Grid>
             )}
-            {hasTrade && (
-              <>
-                <div className="border-b border-dashed border-border px-3 py-2.5">Byttebilspris</div>
-                <div className="border-b border-dashed border-border px-3 py-2.5">{toMoney(tiPrice)}</div>
-                <div className="border-b border-dashed border-border px-3 py-2.5">Pant i byttebil</div>
-                <div className="border-b border-dashed border-border px-3 py-2.5">-{toMoney(tiDebt)}</div>
-                <div className="border-b border-dashed border-border px-3 py-2.5">Byttebil netto</div>
-                <div className="border-b border-dashed border-border px-3 py-2.5">{toMoney(tradeValue)}</div>
-              </>
-            )}
-            <div className="border-b border-dashed border-border px-3 py-2.5">—</div>
-            <div className="border-b border-dashed border-border px-3 py-2.5" />
-            <div className="px-3 py-2.5 font-bold">Kontant betaling nu</div>
-            <div className="px-3 py-2.5 font-bold">{toMoney(cashNow)}</div>
-            {loan > 0 && (
-              <>
-                <div className="px-3 py-2.5 font-bold">Lånebeløb</div>
-                <div className="px-3 py-2.5 font-bold">{toMoney(loan)}</div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
+          </Grid>
+        </Grid>
+        <Box
+          sx={{
+            mt: 2,
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            gap: 1,
+          }}
+        >
+          <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+            Salgspris
+          </Box>
+          <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+            {toMoney(salesPrice)}
+          </Box>
+          {extraSum > 0 && (
+            <>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                + Extras (Ekstra salg)
+              </Box>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                {toMoney(extraSum)}
+              </Box>
+            </>
+          )}
+          {hasTrade && (
+            <>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                Byttebilspris
+              </Box>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                {toMoney(tiPrice)}
+              </Box>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                Pant i byttebil
+              </Box>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                -{toMoney(tiDebt)}
+              </Box>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                Byttebil netto
+              </Box>
+              <Box sx={{ borderBottom: "1px dashed", borderColor: "divider", px: 1.5, py: 1.25 }}>
+                {toMoney(tradeValue)}
+              </Box>
+            </>
+          )}
+          <Box sx={{ px: 1.5, py: 1.25 }}>—</Box>
+          <Box sx={{ px: 1.5, py: 1.25 }} />
+          <Box sx={{ px: 1.5, py: 1.25, fontWeight: 700 }}>Kontant betaling nu</Box>
+          <Box sx={{ px: 1.5, py: 1.25, fontWeight: 700 }}>{toMoney(cashNow)}</Box>
+          {loan > 0 && (
+            <>
+              <Box sx={{ px: 1.5, py: 1.25, fontWeight: 700 }}>Lånebeløb</Box>
+              <Box sx={{ px: 1.5, py: 1.25, fontWeight: 700 }}>{toMoney(loan)}</Box>
+            </>
+          )}
+        </Box>
+      </Paper>
+    </Box>
   )
 }

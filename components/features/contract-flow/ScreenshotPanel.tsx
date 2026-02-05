@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import Alert from "@mui/material/Alert"
+import Paper from "@mui/material/Paper"
+import Typography from "@mui/material/Typography"
 import { getScreenshotStatus, getScreenshotUrl } from "@/lib/api/contracts"
 
 const POLL_INTERVAL_MS = 5000
@@ -47,7 +49,6 @@ export function ScreenshotPanel({ dealId }: ScreenshotPanelProps) {
             setErrorMessage("Screenshot mislykkedes.")
             return
           }
-          // other statuses (e.g. 'ready') – treat as ready and show iframe
           stopPolling()
           setState("ready")
           return
@@ -80,27 +81,34 @@ export function ScreenshotPanel({ dealId }: ScreenshotPanelProps) {
   }, [dealId])
 
   return (
-    <Card>
-      <CardContent className="pt-4">
-        <h4 className="mb-2 font-semibold">Screenshot / forhåndsvisning</h4>
-        {state === "pending" && (
-          <p className="text-sm text-muted-foreground" role="status">
-            Venter på screenshot… (opdateres hvert 5. sekund)
-          </p>
-        )}
-        {state === "failed" && (
-          <p className="text-sm text-destructive" role="alert">
-            {errorMessage}
-          </p>
-        )}
-        {state === "ready" && iframeUrl && (
-          <iframe
-            src={iframeUrl}
-            title="Kontrakt screenshot"
-            className="h-[600px] w-full min-h-[400px] rounded border border-border bg-muted"
-          />
-        )}
-      </CardContent>
-    </Card>
+    <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
+      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
+        Screenshot / forhåndsvisning
+      </Typography>
+      {state === "pending" && (
+        <Typography variant="body2" color="text.secondary" role="status">
+          Venter på screenshot… (opdateres hvert 5. sekund)
+        </Typography>
+      )}
+      {state === "failed" && (
+        <Alert severity="error" role="alert">
+          {errorMessage}
+        </Alert>
+      )}
+      {state === "ready" && iframeUrl && (
+        <iframe
+          src={iframeUrl}
+          title="Kontrakt screenshot"
+          style={{
+            height: 600,
+            width: "100%",
+            minHeight: 400,
+            border: "1px solid",
+            borderColor: "var(--mui-palette-divider)",
+            borderRadius: 8,
+          }}
+        />
+      )}
+    </Paper>
   )
 }

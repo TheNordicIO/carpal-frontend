@@ -1,15 +1,13 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import Button from "@mui/material/Button"
+import Table from "@mui/material/Table"
+import TableBody from "@mui/material/TableBody"
+import TableCell from "@mui/material/TableCell"
+import TableFooter from "@mui/material/TableFooter"
+import TableHead from "@mui/material/TableHead"
+import TableRow from "@mui/material/TableRow"
+import TextField from "@mui/material/TextField"
 import { parseMoney, toMoney } from "@/lib/utils"
 import type { ContractType, ExtraItem } from "@/types/contracts"
 
@@ -34,23 +32,23 @@ export function ExtrasTable({
   const total = extras.reduce((sum, e) => sum + (Number(e.price) || 0), 0)
 
   return (
-    <Table>
-      <TableHeader>
+    <Table size="small">
+      <TableHead>
         <TableRow>
-          <TableHead>Produktnavn</TableHead>
-          <TableHead className="w-[160px]">Pris (kr.)</TableHead>
-          <TableHead className="w-[80px]" />
+          <TableCell>Produktnavn</TableCell>
+          <TableCell sx={{ width: 160 }}>Pris (kr.)</TableCell>
+          <TableCell sx={{ width: 80 }} />
         </TableRow>
-      </TableHeader>
+      </TableHead>
       <TableBody>
         {extras.map((line, idx) => {
           const readonly =
-            contractType === "purchase_agreement" && isSalesFee(line.name)
+            contractType === "purchase_agreement" && isSalesFee(line.name ?? "")
           return (
             <TableRow key={idx}>
               <TableCell>{line.name}</TableCell>
               <TableCell>
-                <Input
+                <TextField
                   type="text"
                   value={toMoney(line.price)}
                   disabled={readonly}
@@ -58,15 +56,17 @@ export function ExtrasTable({
                     if (readonly) return
                     onUpdatePrice(idx, parseMoney(e.target.value))
                   }}
-                  className="h-9 w-full"
-                  aria-label={`Pris for ${line.name}`}
+                  size="small"
+                  fullWidth
+                  inputProps={{ "aria-label": `Pris for ${line.name}` }}
                 />
               </TableCell>
               <TableCell>
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
+                  variant="outlined"
+                  size="small"
+                  color="error"
                   disabled={readonly}
                   onClick={() => onRemove(idx)}
                   aria-label={`Slet ${line.name}`}
@@ -78,13 +78,15 @@ export function ExtrasTable({
           )
         })}
       </TableBody>
-      <tfoot>
+      <TableFooter>
         <TableRow>
-          <TableCell className="text-right font-bold">I alt:</TableCell>
-          <TableCell className="font-bold">{toMoney(total)}</TableCell>
+          <TableCell align="right" sx={{ fontWeight: 700 }}>
+            I alt:
+          </TableCell>
+          <TableCell sx={{ fontWeight: 700 }}>{toMoney(total)}</TableCell>
           <TableCell />
         </TableRow>
-      </tfoot>
+      </TableFooter>
     </Table>
   )
 }

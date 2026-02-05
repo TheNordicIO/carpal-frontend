@@ -1,15 +1,14 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import Box from "@mui/material/Box"
+import Button from "@mui/material/Button"
+import FormControl from "@mui/material/FormControl"
+import InputLabel from "@mui/material/InputLabel"
+import MenuItem from "@mui/material/MenuItem"
+import Paper from "@mui/material/Paper"
+import Select from "@mui/material/Select"
+import TextField from "@mui/material/TextField"
+import Typography from "@mui/material/Typography"
 import { parseMoney, toMoney } from "@/lib/utils"
 import type { ContractType, ExtraItem, ProductData } from "@/types/contracts"
 import { ExtrasTable } from "./ExtrasTable"
@@ -77,98 +76,99 @@ export function ExtrasStep({
   }
 
   return (
-    <section className="p-[18px]" aria-labelledby="extras-heading">
-      <Card>
-        <CardContent className="pt-4">
-          <div className="grid grid-cols-12 gap-3">
-            <div className="col-span-6">
-              <label
-                htmlFor="external_product_select"
-                className="mb-1 block text-xs text-muted-foreground"
-              >
+    <Box component="section" sx={{ p: 2.5 }} aria-labelledby="extras-heading">
+      <Paper elevation={0} sx={{ p: 2, borderRadius: 2 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+            gap: 3,
+          }}
+        >
+          <Box>
+            <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+              <InputLabel id="external_product_select-label">
                 Tilføj garanti/produkt (Products: Category=External)
-              </label>
+              </InputLabel>
               <Select
-                value={selectedExternalId || undefined}
-                onValueChange={onSelectedExternalIdChange}
+                labelId="external_product_select-label"
+                id="external_product_select"
+                value={selectedExternalId || ""}
+                label="Tilføj garanti/produkt (Products: Category=External)"
+                onChange={(e) => onSelectedExternalIdChange(e.target.value)}
               >
-                <SelectTrigger
-                  id="external_product_select"
-                  aria-label="Vælg produkt"
-                  className="w-full"
-                >
-                  <SelectValue placeholder="Vælg produkt…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {externalProducts.map((p) => {
-                    const pid = p.id ?? ""
-                    const pn = p.Product_Name ?? ""
-                    const pr = Number(p.Unit_Price ?? 0)
-                    return (
-                      <SelectItem key={pid} value={pid}>
-                        {String(pn)} ({toMoney(pr)})
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
+                <MenuItem value="">
+                  <em>Vælg produkt…</em>
+                </MenuItem>
+                {externalProducts.map((p) => {
+                  const pid = p.id ?? ""
+                  const pn = p.Product_Name ?? ""
+                  const pr = Number(p.Unit_Price ?? 0)
+                  return (
+                    <MenuItem key={pid} value={pid}>
+                      {String(pn)} ({toMoney(pr)})
+                    </MenuItem>
+                  )
+                })}
               </Select>
-              <div className="mt-2 flex items-center gap-2">
-                <Button type="button" variant="outline" onClick={handleAddExternal}>
-                  Tilføj valgt
-                </Button>
-                <span className="text-xs text-muted-foreground">
-                  Tilføjes også i Deal Invoice (subform) ved afsendelse.
-                </span>
-              </div>
-            </div>
-            <div className="col-span-6">
-              <label className="mb-1 block text-xs text-muted-foreground">
-                Tilføj valgfrit produkt
-              </label>
-              <div className="grid grid-cols-12 gap-3">
-                <div className="col-span-6">
-                  <Input
-                    placeholder="Produktnavn"
-                    value={customProdName}
-                    onChange={(e) => onCustomProdNameChange(e.target.value)}
-                    aria-label="Produktnavn"
-                  />
-                </div>
-                <div className="col-span-6">
-                  <Input
-                    placeholder="Pris (kr.)"
-                    inputMode="decimal"
-                    value={customProdPrice}
-                    onChange={(e) => onCustomProdPriceChange(e.target.value)}
-                    aria-label="Pris"
-                  />
-                </div>
-              </div>
-              <div className="mt-2">
-                <Button type="button" variant="outline" onClick={handleAddCustom}>
-                  Tilføj eget produkt
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="mt-3">
-        <CardContent className="pt-4">
-          <ExtrasTable
-            extras={extras}
-            contractType={contractType}
-            onUpdatePrice={handleUpdatePrice}
-            onRemove={handleRemove}
-          />
-          <p className="mt-2 text-xs text-muted-foreground">
-            • <strong>Purchase Agreement</strong>: <strong>Success Fee</strong>{" "}
-            medregnes altid. Øvrige extras medregnes ikke i purchase-beregningen.
-            <br />• <strong>Sales Agreement</strong>: Alle extras herfra medregnes
-            i salgsberegningen.
-          </p>
-        </CardContent>
-      </Card>
-    </section>
+            </FormControl>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+              <Button type="button" variant="outlined" onClick={handleAddExternal}>
+                Tilføj valgt
+              </Button>
+              <Typography variant="caption" color="text.secondary">
+                Tilføjes også i Deal Invoice (subform) ved afsendelse.
+              </Typography>
+            </Box>
+          </Box>
+          <Box>
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+              Tilføj valgfrit produkt
+            </Typography>
+            <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", alignItems: "flex-start" }}>
+              <TextField
+                placeholder="Produktnavn"
+                value={customProdName}
+                onChange={(e) => onCustomProdNameChange(e.target.value)}
+                size="small"
+                sx={{ flex: 1, minWidth: 140 }}
+                inputProps={{ "aria-label": "Produktnavn" }}
+              />
+              <TextField
+                placeholder="Pris (kr.)"
+                inputMode="decimal"
+                value={customProdPrice}
+                onChange={(e) => onCustomProdPriceChange(e.target.value)}
+                size="small"
+                sx={{ width: 120 }}
+                inputProps={{ "aria-label": "Pris" }}
+              />
+            </Box>
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={handleAddCustom}
+              sx={{ mt: 1.5 }}
+            >
+              Tilføj eget produkt
+            </Button>
+          </Box>
+        </Box>
+      </Paper>
+      <Paper elevation={0} sx={{ p: 2, borderRadius: 2, mt: 2 }}>
+        <ExtrasTable
+          extras={extras}
+          contractType={contractType}
+          onUpdatePrice={handleUpdatePrice}
+          onRemove={handleRemove}
+        />
+        <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 2 }}>
+          • <strong>Purchase Agreement</strong>: <strong>Success Fee</strong> medregnes altid.
+          Øvrige extras medregnes ikke i purchase-beregningen.
+          <br />• <strong>Sales Agreement</strong>: Alle extras herfra medregnes i
+          salgsberegningen.
+        </Typography>
+      </Paper>
+    </Box>
   )
 }

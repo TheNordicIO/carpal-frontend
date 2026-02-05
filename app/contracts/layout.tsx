@@ -1,5 +1,17 @@
+import { ContractsThemeProvider } from "./ContractsThemeProvider"
+
 export const metadata = {
-  title: "Kontrakt (CarPal)",
+  title: "Contracts | {{APP_NAME}}",
+  description: "{{PLACEHOLDER_CONTRACTS_DESCRIPTION}}",
+  openGraph: {
+    title: "Contracts | {{APP_NAME}}",
+    description: "{{PLACEHOLDER_CONTRACTS_DESCRIPTION}}",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contracts | {{APP_NAME}}",
+    description: "{{PLACEHOLDER_CONTRACTS_DESCRIPTION}}",
+  },
 }
 
 export default function ContractsLayout({
@@ -7,9 +19,5 @@ export default function ContractsLayout({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="min-h-screen bg-[#f6f7f9]">
-      {children}
-    </div>
-  )
+  return <ContractsThemeProvider>{children}</ContractsThemeProvider>
 }

@@ -1,8 +1,9 @@
 "use client"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import Box from "@mui/material/Box"
+import Grid from "@mui/material/Grid"
+import Paper from "@mui/material/Paper"
+import TextField from "@mui/material/TextField"
 import type { CarData, ContractType, DealData } from "@/types/contracts"
 
 interface BilStepProps {
@@ -38,112 +39,153 @@ export function BilStep({
   const handoverText = (dealForm[handoverField] as string) ?? deal[handoverField] ?? ""
 
   return (
-    <section className="p-[18px]" aria-labelledby="bil-heading">
-      <div className="grid grid-cols-12 gap-3">
-        <div className="col-span-3">
-          <label htmlFor="bil-maerke" className="mb-1 block text-xs text-muted-foreground">
-            Mærke
-          </label>
-          <Input id="bil-maerke" value={car.Make ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-3">
-          <label htmlFor="bil-model" className="mb-1 block text-xs text-muted-foreground">
-            Model
-          </label>
-          <Input id="bil-model" value={car.Model ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-6">
-          <label htmlFor="bil-variant" className="mb-1 block text-xs text-muted-foreground">
-            Variant
-          </label>
-          <Input id="bil-variant" value={car.Variant ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-3">
-          <label htmlFor="bil-drivmiddel" className="mb-1 block text-xs text-muted-foreground">
-            Drivmiddel
-          </label>
-          <Input id="bil-drivmiddel" value={car.FuelType ?? car.Fuel ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-3">
-          <label htmlFor="bil-modelaar" className="mb-1 block text-xs text-muted-foreground">
-            Modelår
-          </label>
-          <Input id="bil-modelaar" value={String(car.Model_Year ?? car.ModelYear ??"")} disabled readOnly />
-        </div>
-        <div className="col-span-3">
-          <label htmlFor="bil-1reg" className="mb-1 block text-xs text-muted-foreground">
-            1. reg.
-          </label>
-          <Input id="bil-1reg" value={car.First_registration ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-3">
-          <label htmlFor="bil-farve" className="mb-1 block text-xs text-muted-foreground">
-            Farve
-          </label>
-          <Input id="bil-farve" value={colorName} disabled readOnly />
-        </div>
-        <div className="col-span-4">
-          <label htmlFor="bil-vin" className="mb-1 block text-xs text-muted-foreground">
-            Stelnr. (VIN)
-          </label>
-          <Input id="bil-vin" value={car.VIN ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-4">
-          <label htmlFor="bil-regnr" className="mb-1 block text-xs text-muted-foreground">
-            Reg.nr.
-          </label>
-          <Input id="bil-regnr" value={car.Registration ?? car.Licenseplate ?? ""} disabled readOnly />
-        </div>
-        <div className="col-span-4">
-          <label htmlFor="bil-km" className="mb-1 block text-xs text-muted-foreground">
-            Kilometer
-          </label>
-          <Input id="bil-km" value={String(car.Mileage ?? "")} disabled readOnly />
-        </div>
-        <div className="col-span-12 h-px bg-border" aria-hidden />
-        <div className="col-span-4">
-          <label htmlFor="Sales_Price" className="mb-1 block text-xs text-muted-foreground">
-            Bilens pris (Sales_Price)
-          </label>
-          <Input
+    <Box component="section" sx={{ p: 2.5 }} aria-labelledby="bil-heading">
+      <Grid container spacing={2}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TextField
+            id="bil-maerke"
+            label="Mærke"
+            value={car.Make ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TextField
+            id="bil-model"
+            label="Model"
+            value={car.Model ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TextField
+            id="bil-variant"
+            label="Variant"
+            value={car.Variant ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TextField
+            id="bil-drivmiddel"
+            label="Drivmiddel"
+            value={car.FuelType ?? car.Fuel ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TextField
+            id="bil-modelaar"
+            label="Modelår"
+            value={String(car.Model_Year ?? car.ModelYear ?? "")}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TextField
+            id="bil-1reg"
+            label="1. reg."
+            value={car.First_registration ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+          <TextField
+            id="bil-farve"
+            label="Farve"
+            value={colorName}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            id="bil-vin"
+            label="Stelnr. (VIN)"
+            value={car.VIN ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            id="bil-regnr"
+            label="Reg.nr."
+            value={car.Registration ?? car.Licenseplate ?? ""}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
+            id="bil-km"
+            label="Kilometer"
+            value={String(car.Mileage ?? "")}
+            fullWidth
+            size="small"
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+        <Grid size={12}>
+          <Box sx={{ height: 1, bgcolor: "divider", my: 0 }} aria-hidden />
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
             id="Sales_Price"
             name="Sales_Price"
+            label="Bilens pris (Sales_Price)"
             inputMode="decimal"
             value={String(salesPrice)}
             onChange={(e) => onDealFormChange("Sales_Price", e.target.value)}
-            data-module="deal"
-            aria-label="Bilens pris"
+            fullWidth
+            size="small"
+            inputProps={{ "data-module": "deal", "aria-label": "Bilens pris" }}
           />
-        </div>
-        <div className="col-span-4">
-          <label htmlFor="Deliverytime" className="mb-1 block text-xs text-muted-foreground">
-            Leveringsdato (Deliverytime)
-          </label>
-          <Input
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
             id="Deliverytime"
             name="Deliverytime"
+            label="Leveringsdato (Deliverytime)"
             type="date"
             value={deliveryTime}
             onChange={(e) => onDealFormChange("Deliverytime", e.target.value)}
-            data-module="deal"
-            aria-label="Leveringsdato"
+            fullWidth
+            size="small"
+            InputLabelProps={{ shrink: true }}
+            inputProps={{ "data-module": "deal", "aria-label": "Leveringsdato" }}
           />
-        </div>
-        <div className="col-span-4">
-          <label htmlFor={handoverField} className="mb-1 block text-xs text-muted-foreground">
-            Overleveringstekst
-          </label>
-          <Textarea
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <TextField
             id={handoverField}
             name={handoverField}
-            data-module="deal"
-            rows={3}
+            label="Overleveringstekst"
             value={handoverText}
             onChange={(e) => onDealFormChange(handoverField, e.target.value)}
-            aria-label="Overleveringstekst"
+            fullWidth
+            size="small"
+            multiline
+            rows={3}
+            inputProps={{ "data-module": "deal", "aria-label": "Overleveringstekst" }}
           />
-        </div>
-      </div>
-    </section>
+        </Grid>
+      </Grid>
+    </Box>
   )
 }

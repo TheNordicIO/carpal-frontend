@@ -1,5 +1,6 @@
 "use client"
 
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter"
 import { Box } from "@mui/material"
 import { ThemeProvider, createTheme } from "@mui/material/styles"
 
@@ -29,10 +30,12 @@ export function ContractsThemeProvider({
   children: React.ReactNode
 }) {
   return (
-    <ThemeProvider theme={contractsTheme}>
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-        {children}
-      </Box>
-    </ThemeProvider>
+    <AppRouterCacheProvider options={{ key: "contracts-mui" }}>
+      <ThemeProvider theme={contractsTheme}>
+        <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
+          {children}
+        </Box>
+      </ThemeProvider>
+    </AppRouterCacheProvider>
   )
 }

@@ -1,16 +1,16 @@
 import { ContractsThemeProvider } from "./ContractsThemeProvider"
 
 export const metadata = {
-  title: "Contracts | {{APP_NAME}}",
-  description: "{{PLACEHOLDER_CONTRACTS_DESCRIPTION}}",
+  title: "Carpal | Contracts",
+  description: "Contracts flow for Carpal",
   openGraph: {
-    title: "Contracts | {{APP_NAME}}",
-    description: "{{PLACEHOLDER_CONTRACTS_DESCRIPTION}}",
+    title: "Carpal | Contracts",
+    description: "Contracts flow for Carpal",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Contracts | {{APP_NAME}}",
-    description: "{{PLACEHOLDER_CONTRACTS_DESCRIPTION}}",
+    title: "Carpal | Contracts",
+    description: "Contracts flow for Carpal",
   },
 }
 
